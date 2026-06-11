@@ -1,0 +1,11 @@
+[project]
+name = "solas"
+version = "0.0.0"
+description = "A tiny inference framework built from first principles."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/mengyijia49/Solas"
+Repository = "https://github.com/mengyijia49/Solas"

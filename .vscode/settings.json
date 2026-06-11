@@ -1,0 +1,31 @@
+{
+    "editor.semanticHighlighting.enabled": true,
+
+    "files.associations": {
+        "*.h": "cpp",
+        "*.hpp": "cpp",
+        "*.hh": "cpp",
+        "*.hxx": "cpp",
+        "*.c": "c",
+        "*.cpp": "cpp",
+        "*.cc": "cpp",
+        "*.cxx": "cpp",
+        "*.cu": "cuda-cpp",
+        "*.cuh": "cuda-cpp",
+        "CMakeLists.txt": "cmake",
+        "*.cmake": "cmake"
+    },
+
+    "C_Cpp.intelliSenseEngine": "disabled",
+
+    "clangd.arguments": [
+        "--background-index",
+        "--clang-tidy",
+        "--completion-style=detailed",
+        "--header-insertion=iwyu",
+        "--query-driver=/usr/bin/g++,/usr/bin/clang++,/usr/local/cuda/bin/nvcc"
+    ],
+
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.autoImportCompletions": true
+}
