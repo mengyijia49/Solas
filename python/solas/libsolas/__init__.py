@@ -32,7 +32,7 @@ _lib = ctypes.CDLL(str(_find_library()))
 _lib.solas_version.restype = ctypes.c_char_p
 _lib.solas_last_error.restype = ctypes.c_char_p#告诉ctypes:solas_last_error 这个 C 函数返回 char *
 
-_lib.solas_tensor_create.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+_lib.solas_tensor_create.argtypes = [ctypes.POINTER(ctypes.c_longlong),ctypes.c_int,ctypes.POINTER(ctypes.c_void_p)]
 _lib.solas_tensor_create.restype = ctypes.c_int
 
 _lib.solas_tensor_destroy.argtypes = [ctypes.c_void_p]
@@ -50,12 +50,21 @@ def solas_version() -> str:
 def solas_last_error() -> str:
     return _lib.solas_last_error().decode("utf-8")
 
-def solas_tensor_create() -> int:
+
+def solas_tensor_create(shape: tuple[int, ...] = ()) -> int:# 默认 shape 是空 tuple，也就是标量。
     tensor = ctypes.c_void_p()                              # 1. 创建一个空的 c_void_p
-    status = _lib.solas_tensor_create(ctypes.byref(tensor)) # 2. 把它的地址传给 C API，3. C++ 把 Tensor 指针写进去
-    if status != 0:                                         # 4. 如果失败，抛 RuntimeError
-        raise RuntimeError(solas_last_error())              #
-    return tensor.value                                     # 5. 如果成功，返回指针值
+    rank = len(shape)                                       # rank 来自 Python tuple 的长度。
+
+    if rank == 0:
+        shape_ptr = None                                    # 对于标量 Tensor，传给 C 的 shape 指针是 NULL。
+    else:
+        shape_array = (ctypes.c_longlong * rank)(*shape)    # 把 Python tuple 转成 C 数组。例如(2, 3)变成 C 里的：long long shape[2] = {2, 3};
+        shape_ptr = shape_array
+
+    status = _lib.solas_tensor_create(shape_ptr, ctypes.c_int(rank), ctypes.byref(tensor))
+    if status != 0:
+        raise RuntimeError(solas_last_error())
+    return tensor.value
 
 def solas_tensor_destroy(handle: int | None) -> None:
     _lib.solas_tensor_destroy(ctypes.c_void_p(handle))

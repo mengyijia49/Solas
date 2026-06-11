@@ -1,4 +1,4 @@
-print("loading solas")
+
 #从底层 ctypes 封装层拿到 C API 函数。
 from solas.libsolas import solas_last_error, solas_version
 from solas.tensor import Tensor

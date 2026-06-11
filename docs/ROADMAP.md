@@ -27,11 +27,11 @@ Solas will grow in small, testable steps.
 ## Phase 2: Tensor Core
 
 - [ ] Store tensor dtype.
-- [ ] Store tensor shape.
+- [x] Store tensor shape.
 - [ ] Store tensor data on CPU.
-- [ ] Implement scalar tensor.
-- [ ] Implement 1D tensor.
-- [ ] Implement 2D tensor.
+- [x] Implement scalar tensor.
+- [x] Implement 1D tensor.
+- [x] Implement 2D tensor.
 - [ ] Add tensor data read/write APIs.
 
 

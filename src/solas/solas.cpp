@@ -31,17 +31,36 @@ const char *solas_last_error(void) {
     return last_error.c_str();
 }
 
-SolasStatus solas_tensor_create(SolasTensor **out) {
+SolasStatus solas_tensor_create(const long long *shape, int rank, SolasTensor **out) {
     clear_error();
 
     if (out == nullptr) {
         return set_error("solas_tensor_create received null output pointer");
     }
 
+    if (rank < 0) {
+        return set_error("solas_tensor_create received negative rank");
+    }
+
+    if (rank > 0 && shape == nullptr) {
+        return set_error("solas_tensor_create received null shape for non-scalar tensor");
+    }
+
+    for (int i = 0; i < rank; ++i) {
+        if (shape[i] < 0) {
+            return set_error("solas_tensor_create received negative shape dimension");
+        }
+    }
+
     SolasTensor *tensor = new (std::nothrow) SolasTensor{};
+
     if (tensor == nullptr) {
         *out = nullptr;
         return set_error("failed to allocate SolasTensor");
+    }
+
+    if (rank > 0) {
+        tensor->shape.assign(shape, shape + rank);//?
     }
 
     *out = tensor;

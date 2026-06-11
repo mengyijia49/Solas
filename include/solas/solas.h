@@ -16,7 +16,7 @@ const char *solas_version(void);//返回当前 Solas 版本。
 const char *solas_last_error(void);//返回最近一次 C/C++ 后端错误信息。
 
 
-SolasStatus solas_tensor_create(SolasTensor **out);//创建一个Tensor
+SolasStatus solas_tensor_create(const long long *shape, int rank, SolasTensor **out);//创建一个Tensor
 void solas_tensor_destroy(SolasTensor *tensor);//销毁tensor
 
 SolasStatus solas_tensor_rank(const SolasTensor *tensor, int *out);//获取 Tensor 的维度数量。scalar: rank = 0,vector: rank = 1,matrix: rank = 2
