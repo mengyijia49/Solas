@@ -16,3 +16,11 @@ Solas 是一个从零开始手写的推理框架。
 - `python/`：放 Python 前端和 ctypes 封装。
 - `test/`：放测试代码。
 - `docs/`：放设计文档和开发记录。
+
+
+## 开发命令
+
+编译 C++ 后端并运行所有测试：
+
+```bash
+./scripts/test.sh
