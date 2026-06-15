@@ -36,6 +36,7 @@ Solas will grow in small, testable steps.
 - [x] Add tensor data read API.
 - [x] Add tensor data write API.
 - [x] Add tensor fill API.
+- [x] Add Python `Tensor.to_list()`.
 
 ## Phase 3: Operators
 
