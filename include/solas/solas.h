@@ -32,6 +32,7 @@ SolasStatus solas_tensor_data_size(const SolasTensor *tensor, long long *out);
 SolasStatus solas_tensor_fill_float32(SolasTensor *tensor, float value);
 SolasStatus solas_tensor_get_float32(const SolasTensor *tensor, long long index, float *out);//读取第index个元素写到out。这里是一维扁平index，暂时不做多维索引
 SolasStatus solas_tensor_set_float32(SolasTensor *tensor, long long index, float value);//把 float32 Tensor 的第 index 个元素设置为 value，扁平索引。
+SolasStatus solas_tensor_add_float32(const SolasTensor *lhs,const SolasTensor *rhs,SolasTensor *out);
 
 #ifdef __cplusplus
 }

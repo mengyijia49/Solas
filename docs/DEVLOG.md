@@ -50,3 +50,9 @@
 - Added Python `Tensor.to_list()` for scalar, 1D, and 2D tensors.
 - Added tests for scalar, vector, and matrix list conversion.
 - Added `scripts/test.sh` to build the backend and run the Python test suite.
+
+## 2026-06-17
+- Added `solas_tensor_add_float32` C API.
+- Implemented elementwise float32 add in the C++ backend.
+- Exposed `Tensor.add()` and `Tensor.__add__()` in Python.
+- Added tests for add, `+`, and mismatched shapes.

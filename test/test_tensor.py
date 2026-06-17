@@ -160,6 +160,54 @@ class TensorTest(unittest.TestCase):
 
         tensor.close()
     
+    #add测试：正常路径测试
+    def test_tensor_add_float32(self) -> None:
+        lhs = solas.Tensor((2, 3))
+        rhs = solas.Tensor((2, 3))
+
+        lhs.fill(1.0)
+        rhs.fill(2.0)
+
+        out = lhs.add(rhs)
+
+        self.assertEqual(out.shape, (2, 3))
+        self.assertEqual(out.dtype, "float32")
+        self.assertEqual(out.to_list(), [[3.0, 3.0, 3.0], [3.0, 3.0, 3.0]])
+
+        lhs.close()
+        rhs.close()
+        out.close()
+    
+    #a+b：运算符重载测试
+    def test_tensor_add_operator(self) -> None:
+        lhs = solas.Tensor((2,))
+        rhs = solas.Tensor((2,))
+
+        lhs.set(0, 1.0)
+        lhs.set(1, 2.0)
+        rhs.set(0, 3.0)
+        rhs.set(1, 4.0)
+
+        out = lhs + rhs
+
+        self.assertEqual(out.to_list(), [4.0, 6.0])
+
+        lhs.close()
+        rhs.close()
+        out.close()
+    
+    #add测试：shape不匹配测试
+    def test_tensor_add_rejects_mismatched_shapes(self) -> None:
+        lhs = solas.Tensor((2, 3))
+        rhs = solas.Tensor((3, 2))
+
+        with self.assertRaisesRegex(ValueError, "matching shapes"):
+            lhs.add(rhs)
+
+        lhs.close()
+        rhs.close()
+
+    
     def test_rejects_negative_shape_dimension(self) -> None:
         with self.assertRaisesRegex(RuntimeError, "negative shape dimension"):
             solas.Tensor((-1,))

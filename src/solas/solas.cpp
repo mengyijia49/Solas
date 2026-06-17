@@ -3,6 +3,7 @@
 #include <new>
 #include <string>
 #include <vector>
+#include <cstddef>
 
 namespace {//只给当前 .cpp 文件内部使用的工具和状态。
 
@@ -257,5 +258,46 @@ SolasStatus solas_tensor_set_float32(SolasTensor *tensor, long long index, float
     }
 
     tensor->data[static_cast<size_t>(index)] = value;
+    return SOLAS_STATUS_OK;
+}
+
+SolasStatus solas_tensor_add_float32(
+    const SolasTensor *lhs,
+    const SolasTensor *rhs,
+    SolasTensor *out
+) {
+    clear_error();
+
+    if (lhs == nullptr) {
+        return set_error("solas_tensor_add_float32 received null lhs tensor");
+    }
+
+    if (rhs == nullptr) {
+        return set_error("solas_tensor_add_float32 received null rhs tensor");
+    }
+
+    if (out == nullptr) {
+        return set_error("solas_tensor_add_float32 received null output tensor");
+    }
+
+    if (lhs->dtype != SOLAS_DTYPE_FLOAT32 ||
+        rhs->dtype != SOLAS_DTYPE_FLOAT32 ||
+        out->dtype != SOLAS_DTYPE_FLOAT32) {
+        return set_error("solas_tensor_add_float32 only supports float32 tensors");
+    }
+
+    if (lhs->shape != rhs->shape || lhs->shape != out->shape) {
+        return set_error("solas_tensor_add_float32 requires matching shapes");
+    }
+
+    if (lhs->data.size() != rhs->data.size() ||
+        lhs->data.size() != out->data.size()) {
+        return set_error("solas_tensor_add_float32 requires matching data sizes");
+    }
+
+    for (size_t i = 0; i < out->data.size(); ++i) {
+        out->data[i] = lhs->data[i] + rhs->data[i];
+    }
+
     return SOLAS_STATUS_OK;
 }

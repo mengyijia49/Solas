@@ -69,6 +69,9 @@ _lib.solas_tensor_get_float32.restype = ctypes.c_int
 _lib.solas_tensor_set_float32.argtypes = [ctypes.c_void_p,ctypes.c_longlong,ctypes.c_float,]
 _lib.solas_tensor_set_float32.restype = ctypes.c_int
 
+_lib.solas_tensor_add_float32.argtypes = [ctypes.c_void_p,ctypes.c_void_p,ctypes.c_void_p,]
+_lib.solas_tensor_add_float32.restype = ctypes.c_int
+
 def solas_version() -> str:
     return _lib.solas_version().decode("utf-8")
 
@@ -162,6 +165,16 @@ def solas_tensor_set_float32(handle: int | None, index: int, value: float) -> No
         ctypes.c_void_p(handle),
         ctypes.c_longlong(index),
         ctypes.c_float(value),
+    )
+    if status != 0:
+        raise RuntimeError(solas_last_error())
+    
+
+def solas_tensor_add_float32(lhs: int | None, rhs: int | None, out: int | None) -> None:
+    status = _lib.solas_tensor_add_float32(
+        ctypes.c_void_p(lhs),
+        ctypes.c_void_p(rhs),
+        ctypes.c_void_p(out),
     )
     if status != 0:
         raise RuntimeError(solas_last_error())

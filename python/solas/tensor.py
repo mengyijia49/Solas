@@ -13,6 +13,7 @@ from solas.libsolas import (
     solas_tensor_fill_float32,
     solas_tensor_get_float32,
     solas_tensor_set_float32,
+    solas_tensor_add_float32,
 )
 
 _DTYPE_TO_ID = {"float32": SOLAS_DTYPE_FLOAT32,}
@@ -60,6 +61,20 @@ class Tensor:
     
     def set(self, index: int, value: float) -> None:
         solas_tensor_set_float32(self._handle, index, value)
+
+    def add(self, other: "Tensor") -> "Tensor":
+        if self.shape != other.shape:
+            raise ValueError("Tensor.add requires matching shapes")
+
+        if self.dtype != other.dtype:
+            raise ValueError("Tensor.add requires matching dtypes")
+
+        out = Tensor(self.shape, dtype=self.dtype)
+        solas_tensor_add_float32(self._handle, other._handle, out._handle)
+        return out
+
+    def __add__(self, other: "Tensor") -> "Tensor":
+        return self.add(other)
 
     def to_list(self) -> object:
         if self.rank == 0:
