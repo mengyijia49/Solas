@@ -72,6 +72,23 @@ _lib.solas_tensor_set_float32.restype = ctypes.c_int
 _lib.solas_tensor_add_float32.argtypes = [ctypes.c_void_p,ctypes.c_void_p,ctypes.c_void_p,]
 _lib.solas_tensor_add_float32.restype = ctypes.c_int
 
+_lib.solas_tensor_mul_float32.argtypes = [ctypes.c_void_p,ctypes.c_void_p,ctypes.c_void_p,]
+_lib.solas_tensor_mul_float32.restype = ctypes.c_int
+
+_lib.solas_tensor_sub_float32.argtypes = [ctypes.c_void_p,ctypes.c_void_p,ctypes.c_void_p,]
+_lib.solas_tensor_sub_float32.restype = ctypes.c_int
+
+_lib.solas_tensor_div_float32.argtypes = [ctypes.c_void_p,ctypes.c_void_p,ctypes.c_void_p,]
+_lib.solas_tensor_div_float32.restype = ctypes.c_int
+
+_lib.solas_tensor_neg_float32.argtypes = [ctypes.c_void_p,ctypes.c_void_p,]
+_lib.solas_tensor_neg_float32.restype = ctypes.c_int
+
+_lib.solas_tensor_add_scalar_float32.argtypes = [ctypes.c_void_p,ctypes.c_float,ctypes.c_void_p,]
+_lib.solas_tensor_add_scalar_float32.restype = ctypes.c_int
+
+
+
 def solas_version() -> str:
     return _lib.solas_version().decode("utf-8")
 
@@ -174,6 +191,53 @@ def solas_tensor_add_float32(lhs: int | None, rhs: int | None, out: int | None) 
     status = _lib.solas_tensor_add_float32(
         ctypes.c_void_p(lhs),
         ctypes.c_void_p(rhs),
+        ctypes.c_void_p(out),
+    )
+    if status != 0:
+        raise RuntimeError(solas_last_error())
+    
+
+def solas_tensor_mul_float32(lhs: int | None, rhs: int | None, out: int | None) -> None:
+    status = _lib.solas_tensor_mul_float32(
+        ctypes.c_void_p(lhs),
+        ctypes.c_void_p(rhs),
+        ctypes.c_void_p(out),
+    )
+    if status != 0:
+        raise RuntimeError(solas_last_error())
+    
+
+def solas_tensor_sub_float32(lhs: int | None, rhs: int | None, out: int | None) -> None:
+    status = _lib.solas_tensor_sub_float32(
+        ctypes.c_void_p(lhs),
+        ctypes.c_void_p(rhs),
+        ctypes.c_void_p(out),
+    )
+    if status != 0:
+        raise RuntimeError(solas_last_error())
+
+def solas_tensor_div_float32(lhs: int | None, rhs: int | None, out: int | None) -> None:
+    status = _lib.solas_tensor_div_float32(
+        ctypes.c_void_p(lhs),
+        ctypes.c_void_p(rhs),
+        ctypes.c_void_p(out),
+    )
+    if status != 0:
+        raise RuntimeError(solas_last_error())
+    
+def solas_tensor_neg_float32(input_: int | None, out: int | None) -> None:
+    status = _lib.solas_tensor_neg_float32(
+        ctypes.c_void_p(input_),
+        ctypes.c_void_p(out),
+    )
+    if status != 0:
+        raise RuntimeError(solas_last_error())
+    
+
+def solas_tensor_add_scalar_float32(input_: int | None, scalar: float, out: int | None) -> None:
+    status = _lib.solas_tensor_add_scalar_float32(
+        ctypes.c_void_p(input_),
+        ctypes.c_float(scalar),
         ctypes.c_void_p(out),
     )
     if status != 0:

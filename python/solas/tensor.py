@@ -1,4 +1,5 @@
-from __future__ import annotations
+from __future__ import annotations 
+Number = int | float
 
 from solas.libsolas import (
     SOLAS_DTYPE_FLOAT32,
@@ -14,6 +15,11 @@ from solas.libsolas import (
     solas_tensor_get_float32,
     solas_tensor_set_float32,
     solas_tensor_add_float32,
+    solas_tensor_mul_float32,
+    solas_tensor_sub_float32,
+    solas_tensor_div_float32,
+    solas_tensor_neg_float32,
+    solas_tensor_add_scalar_float32,
 )
 
 _DTYPE_TO_ID = {"float32": SOLAS_DTYPE_FLOAT32,}
@@ -72,9 +78,77 @@ class Tensor:
         out = Tensor(self.shape, dtype=self.dtype)
         solas_tensor_add_float32(self._handle, other._handle, out._handle)
         return out
+    
+    def mul(self, other: "Tensor") -> "Tensor":
+        if self.shape != other.shape:
+            raise ValueError("Tensor.mul requires matching shapes")
 
-    def __add__(self, other: "Tensor") -> "Tensor":
-        return self.add(other)
+        if self.dtype != other.dtype:
+            raise ValueError("Tensor.mul requires matching dtypes")
+
+        out = Tensor(self.shape, dtype=self.dtype)
+        solas_tensor_mul_float32(self._handle, other._handle, out._handle)
+        return out
+    
+
+    def sub(self, other: "Tensor") -> "Tensor":
+        if self.shape != other.shape:
+            raise ValueError("Tensor.sub requires matching shapes")
+
+        if self.dtype != other.dtype:
+            raise ValueError("Tensor.sub requires matching dtypes")
+
+        out = Tensor(self.shape, dtype=self.dtype)
+        solas_tensor_sub_float32(self._handle, other._handle, out._handle)
+        return out
+
+    def div(self, other: "Tensor") -> "Tensor":
+        if self.shape != other.shape:
+            raise ValueError("Tensor.div requires matching shapes")
+
+        if self.dtype != other.dtype:
+            raise ValueError("Tensor.div requires matching dtypes")
+
+        out = Tensor(self.shape, dtype=self.dtype)
+        solas_tensor_div_float32(self._handle, other._handle, out._handle)
+        return out
+    
+    def neg(self) -> "Tensor":
+        out = Tensor(self.shape, dtype=self.dtype)
+        solas_tensor_neg_float32(self._handle, out._handle)
+        return out
+    
+    def add_scalar(self, scalar: float) -> "Tensor":
+        out = Tensor(self.shape, dtype=self.dtype)
+        solas_tensor_add_scalar_float32(self._handle, scalar, out._handle)
+        return out
+
+    def __add__(self, other: "Tensor | Number") -> "Tensor":
+        if isinstance(other, Tensor):
+            return self.add(other)
+
+        if isinstance(other, (int, float)):
+            return self.add_scalar(float(other))
+
+        return NotImplemented#告诉python：这个类型组合我不会处理，请尝试别的运算方法。
+    
+    def __radd__(self, other: Number) -> "Tensor":
+        if isinstance(other, (int, float)):
+            return self.add_scalar(float(other))
+
+        return NotImplemented
+    
+    def __mul__(self, other: "Tensor") -> "Tensor":
+        return self.mul(other)
+    
+    def __sub__(self, other: "Tensor") -> "Tensor":
+        return self.sub(other)
+    
+    def __truediv__(self, other: "Tensor") -> "Tensor":
+        return self.div(other)
+    
+    def __neg__(self) -> "Tensor":
+        return self.neg()
 
     def to_list(self) -> object:
         if self.rank == 0:

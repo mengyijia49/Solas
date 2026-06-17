@@ -40,8 +40,9 @@ Solas will grow in small, testable steps.
 
 ## Phase 3: Operators
 
-- [ ] Add elementwise add.
-- [ ] Add elementwise multiply.
+- [x] Add elementwise add.
+- [x] Add elementwise multiply.
+- [x] Add elementwise subtract.
 - [ ] Add matrix multiplication.
 - [ ] Add softmax.
 - [ ] Add layer normalization.

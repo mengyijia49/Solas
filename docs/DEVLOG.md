@@ -56,3 +56,27 @@
 - Implemented elementwise float32 add in the C++ backend.
 - Exposed `Tensor.add()` and `Tensor.__add__()` in Python.
 - Added tests for add, `+`, and mismatched shapes.
+- Added `solas_tensor_mul_float32` C API.
+- Implemented elementwise float32 multiply in the C++ backend.
+- Exposed `Tensor.mul()` and `Tensor.__mul__()` in Python.
+- Added tests for multiply, `*`, and mismatched shapes.
+
+## 2026-06-18
+- Added `solas_tensor_sub_float32` C API.
+- Implemented elementwise float32 subtract in the C++ backend.
+- Exposed `Tensor.sub()` and `Tensor.__sub__()` in Python.
+- Added tests for subtract, `-`, and mismatched shapes.
+- Added `solas_tensor_div_float32` C API.
+- Implemented elementwise float32 divide in the C++ backend.
+- Exposed `Tensor.div()` and `Tensor.__truediv__()` in Python.
+- Added tests for divide, `/`, and mismatched shapes.
+- Refactored binary float32 operator validation into a shared C++ helper.
+- Refactored add, multiply, subtract, and divide to use a shared binary operator loop.
+- Added `solas_tensor_neg_float32` C API.
+- Added shared unary float32 operator helper in the C++ backend.
+- Exposed `Tensor.neg()` and `Tensor.__neg__()` in Python.
+- Added tests for unary negation and `-tensor`.
+- Added `solas_tensor_add_scalar_float32` C API.
+- Added shared scalar float32 operator helper in the C++ backend.
+- Exposed `Tensor.add_scalar()`, `tensor + scalar`, and `scalar + tensor` in Python.
+- Added tests for scalar add and reverse scalar add.

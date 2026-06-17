@@ -196,6 +196,7 @@ class TensorTest(unittest.TestCase):
         rhs.close()
         out.close()
     
+
     #add测试：shape不匹配测试
     def test_tensor_add_rejects_mismatched_shapes(self) -> None:
         lhs = solas.Tensor((2, 3))
@@ -206,6 +207,231 @@ class TensorTest(unittest.TestCase):
 
         lhs.close()
         rhs.close()
+
+    #mul测试：正常路径测试：
+    def test_tensor_mul_float32(self) -> None:
+        lhs = solas.Tensor((2, 3))
+        rhs = solas.Tensor((2, 3))
+
+        lhs.fill(2.0)
+        rhs.fill(3.0)
+
+        out = lhs.mul(rhs)
+
+        self.assertEqual(out.shape, (2, 3))
+        self.assertEqual(out.dtype, "float32")
+        self.assertEqual(out.to_list(), [[6.0, 6.0, 6.0], [6.0, 6.0, 6.0]])
+
+        lhs.close()
+        rhs.close()
+        out.close()
+    
+    #mul测试：运算符重载测试
+    def test_tensor_mul_operator(self) -> None:
+        lhs = solas.Tensor((2,))
+        rhs = solas.Tensor((2,))
+
+        lhs.set(0, 2.0)
+        lhs.set(1, 3.0)
+        rhs.set(0, 4.0)
+        rhs.set(1, 5.0)
+
+        out = lhs * rhs
+
+        self.assertEqual(out.to_list(), [8.0, 15.0])
+
+        lhs.close()
+        rhs.close()
+        out.close()
+
+    #mul测试：shape不匹配测试
+    def test_tensor_mul_rejects_mismatched_shapes(self) -> None:
+        lhs = solas.Tensor((2, 3))
+        rhs = solas.Tensor((3, 2))
+
+        with self.assertRaisesRegex(ValueError, "matching shapes"):
+            lhs.mul(rhs)
+
+        lhs.close()
+        rhs.close()
+    
+    #sub测试：正常路径测试
+    def test_tensor_sub_float32(self) -> None:
+        lhs = solas.Tensor((2, 3))
+        rhs = solas.Tensor((2, 3))
+
+        lhs.fill(5.0)
+        rhs.fill(2.0)
+
+        out = lhs.sub(rhs)
+
+        self.assertEqual(out.shape, (2, 3))
+        self.assertEqual(out.dtype, "float32")
+        self.assertEqual(out.to_list(), [[3.0, 3.0, 3.0], [3.0, 3.0, 3.0]])
+
+        lhs.close()
+        rhs.close()
+        out.close()
+
+    #sub测试：运算符-重载测试：
+    def test_tensor_sub_operator(self) -> None:
+        lhs = solas.Tensor((2,))
+        rhs = solas.Tensor((2,))
+
+        lhs.set(0, 5.0)
+        lhs.set(1, 8.0)
+        rhs.set(0, 2.0)
+        rhs.set(1, 3.0)
+
+        out = lhs - rhs
+
+        self.assertEqual(out.to_list(), [3.0, 5.0])
+
+        lhs.close()
+        rhs.close()
+        out.close()
+    
+    #sub测试：shape不匹配测试
+    def test_tensor_sub_rejects_mismatched_shapes(self) -> None:
+        lhs = solas.Tensor((2, 3))
+        rhs = solas.Tensor((3, 2))
+
+        with self.assertRaisesRegex(ValueError, "matching shapes"):
+            lhs.sub(rhs)
+
+        lhs.close()
+        rhs.close()
+    
+    #div测试：正常路径测试：
+    def test_tensor_div_float32(self) -> None:
+        lhs = solas.Tensor((2, 3))
+        rhs = solas.Tensor((2, 3))
+
+        lhs.fill(6.0)
+        rhs.fill(2.0)
+
+        out = lhs.div(rhs)
+
+        self.assertEqual(out.shape, (2, 3))
+        self.assertEqual(out.dtype, "float32")
+        self.assertEqual(out.to_list(), [[3.0, 3.0, 3.0], [3.0, 3.0, 3.0]])
+
+        lhs.close()
+        rhs.close()
+        out.close()
+
+    #div测试：/运算符重载测试：
+    def test_tensor_div_operator(self) -> None:
+        lhs = solas.Tensor((2,))
+        rhs = solas.Tensor((2,))
+
+        lhs.set(0, 8.0)
+        lhs.set(1, 15.0)
+        rhs.set(0, 2.0)
+        rhs.set(1, 3.0)
+
+        out = lhs / rhs
+
+        self.assertEqual(out.to_list(), [4.0, 5.0])
+
+        lhs.close()
+        rhs.close()
+        out.close()
+
+    #div测试：shape 不匹配测试：
+    def test_tensor_div_rejects_mismatched_shapes(self) -> None:
+        lhs = solas.Tensor((2, 3))
+        rhs = solas.Tensor((3, 2))
+
+        with self.assertRaisesRegex(ValueError, "matching shapes"):
+            lhs.div(rhs)
+
+        lhs.close()
+        rhs.close()
+    
+    #neg测试：正常方法测试：
+    def test_tensor_neg_float32(self) -> None:
+        tensor = solas.Tensor((3,))
+
+        tensor.set(0, 3.0)
+        tensor.set(1, -4.0)
+        tensor.set(2, 0.0)
+
+        out = tensor.neg()
+
+        self.assertEqual(out.to_list(), [-3.0, 4.0, -0.0])
+
+        tensor.close()
+        out.close()
+
+    #neg测试：一元-运算符重载测试：
+    def test_tensor_neg_operator(self) -> None:
+        tensor = solas.Tensor((2,))
+
+        tensor.set(0, 1.5)
+        tensor.set(1, -2.5)
+
+        out = -tensor
+
+        self.assertEqual(out.to_list(), [-1.5, 2.5])
+
+        tensor.close()
+        out.close()
+
+    #add scalar测试：
+    def test_tensor_add_scalar_float32(self) -> None:
+        tensor = solas.Tensor((3,))
+
+        tensor.set(0, 1.0)
+        tensor.set(1, 2.0)
+        tensor.set(2, -3.0)
+
+        out = tensor.add_scalar(3.0)
+
+        self.assertEqual(out.to_list(), [4.0, 5.0, 0.0])
+
+        tensor.close()
+        out.close()
+
+    #add scalar测试：标量 Tensor 的测试：
+    def test_scalar_tensor_add_scalar_float32(self) -> None:
+        tensor = solas.Tensor()
+        tensor.fill(2.5)
+
+        out = tensor.add_scalar(1.5)
+
+        self.assertAlmostEqual(out.to_list(), 4.0)
+
+        tensor.close()
+        out.close()
+
+    #tensor + scalar测试：
+    def test_tensor_add_scalar_operator(self) -> None:
+        tensor = solas.Tensor((2,))
+
+        tensor.set(0, 1.0)
+        tensor.set(1, 2.0)
+
+        out = tensor + 3.0
+
+        self.assertEqual(out.to_list(), [4.0, 5.0])
+
+        tensor.close()
+        out.close()
+
+    #scalar + tensor测试：
+    def test_scalar_add_tensor_operator(self) -> None:
+        tensor = solas.Tensor((2,))
+
+        tensor.set(0, 1.0)
+        tensor.set(1, 2.0)
+
+        out = 3.0 + tensor
+
+        self.assertEqual(out.to_list(), [4.0, 5.0])
+
+        tensor.close()
+        out.close()
 
     
     def test_rejects_negative_shape_dimension(self) -> None:

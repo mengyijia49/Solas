@@ -5,6 +5,12 @@
 #include <vector>
 #include <cstddef>
 
+struct SolasTensor {
+    std::vector<long long> shape;//表示每个 Tensor 内部保存一个 shape 数组。
+    SolasDType dtype;
+    std::vector<float> data;
+};//头文件对外隐藏结构体，.cpp 内部必须先完整定义结构体，才能访问字段。如果这段放到namespace后面，编译报错
+
 namespace {//只给当前 .cpp 文件内部使用的工具和状态。
 
 thread_local std::string last_error;
@@ -27,13 +33,167 @@ long long dtype_size(SolasDType dtype) {
     return 0;
 }
 
+SolasStatus validate_binary_float32_op(
+    const char *op_name,
+    const SolasTensor *lhs,
+    const SolasTensor *rhs,
+    const SolasTensor *out
+) {
+    if (lhs == nullptr) {
+        last_error = std::string(op_name) + " received null lhs tensor";
+        return SOLAS_STATUS_ERROR;
+    }
+
+    if (rhs == nullptr) {
+        last_error = std::string(op_name) + " received null rhs tensor";
+        return SOLAS_STATUS_ERROR;
+    }
+
+    if (out == nullptr) {
+        last_error = std::string(op_name) + " received null output tensor";
+        return SOLAS_STATUS_ERROR;
+    }
+
+    if (lhs->dtype != SOLAS_DTYPE_FLOAT32 ||
+        rhs->dtype != SOLAS_DTYPE_FLOAT32 ||
+        out->dtype != SOLAS_DTYPE_FLOAT32) {
+        last_error = std::string(op_name) + " only supports float32 tensors";
+        return SOLAS_STATUS_ERROR;
+    }
+
+    if (lhs->shape != rhs->shape || lhs->shape != out->shape) {
+        last_error = std::string(op_name) + " requires matching shapes";
+        return SOLAS_STATUS_ERROR;
+    }
+
+    if (lhs->data.size() != rhs->data.size() ||
+        lhs->data.size() != out->data.size()) {
+        last_error = std::string(op_name) + " requires matching data sizes";
+        return SOLAS_STATUS_ERROR;
+    }
+
+    return SOLAS_STATUS_OK;
+}
+
+float add_float32(float lhs, float rhs) {
+    return lhs + rhs;
+}
+
+float mul_float32(float lhs, float rhs) {
+    return lhs * rhs;
+}
+
+float sub_float32(float lhs, float rhs) {
+    return lhs - rhs;
+}
+
+float div_float32(float lhs, float rhs) {
+    return lhs / rhs;
+}
+
+SolasStatus binary_float32_op(
+    const char *op_name,
+    const SolasTensor *lhs,
+    const SolasTensor *rhs,
+    SolasTensor *out,
+    float (*op)(float, float)//表示 op 是一个函数指针，指向这种函数：float something(float, float)
+) {
+    clear_error();
+
+    SolasStatus status = validate_binary_float32_op(op_name, lhs, rhs, out);
+    if (status != SOLAS_STATUS_OK) {
+        return status;
+    }
+
+    for (size_t i = 0; i < out->data.size(); ++i) {
+        out->data[i] = op(lhs->data[i], rhs->data[i]);
+    }
+
+    return SOLAS_STATUS_OK;
+}
+
+SolasStatus validate_unary_float32_op(
+    const char *op_name,
+    const SolasTensor *input,
+    const SolasTensor *out
+) {
+    if (input == nullptr) {
+        last_error = std::string(op_name) + " received null input tensor";
+        return SOLAS_STATUS_ERROR;
+    }
+
+    if (out == nullptr) {
+        last_error = std::string(op_name) + " received null output tensor";
+        return SOLAS_STATUS_ERROR;
+    }
+
+    if (input->dtype != SOLAS_DTYPE_FLOAT32 ||
+        out->dtype != SOLAS_DTYPE_FLOAT32) {
+        last_error = std::string(op_name) + " only supports float32 tensors";
+        return SOLAS_STATUS_ERROR;
+    }
+
+    if (input->shape != out->shape) {
+        last_error = std::string(op_name) + " requires matching shapes";
+        return SOLAS_STATUS_ERROR;
+    }
+
+    if (input->data.size() != out->data.size()) {
+        last_error = std::string(op_name) + " requires matching data sizes";
+        return SOLAS_STATUS_ERROR;
+    }
+
+    return SOLAS_STATUS_OK;
+}
+
+float neg_float32(float value) {
+    return -value;
+}
+
+SolasStatus unary_float32_op(
+    const char *op_name,
+    const SolasTensor *input,
+    SolasTensor *out,
+    float (*op)(float)
+) {
+    clear_error();
+
+    SolasStatus status = validate_unary_float32_op(op_name, input, out);
+    if (status != SOLAS_STATUS_OK) {
+        return status;
+    }
+
+    for (size_t i = 0; i < out->data.size(); ++i) {
+        out->data[i] = op(input->data[i]);
+    }
+
+    return SOLAS_STATUS_OK;
+}
+
+SolasStatus scalar_float32_op(
+    const char *op_name,
+    const SolasTensor *input,
+    float scalar,
+    SolasTensor *out,
+    float (*op)(float, float)
+) {
+    clear_error();
+
+    SolasStatus status = validate_unary_float32_op(op_name, input, out);
+    if (status != SOLAS_STATUS_OK) {
+        return status;
+    }
+
+    for (size_t i = 0; i < out->data.size(); ++i) {
+        out->data[i] = op(input->data[i], scalar);
+    }
+
+    return SOLAS_STATUS_OK;
+}
+
 }  // namespace
 
-struct SolasTensor {
-    std::vector<long long> shape;//表示每个 Tensor 内部保存一个 shape 数组。
-    SolasDType dtype;
-    std::vector<float> data;
-};
+
 
 const char *solas_version(void) {
     return "0.0.0";
@@ -266,38 +426,50 @@ SolasStatus solas_tensor_add_float32(
     const SolasTensor *rhs,
     SolasTensor *out
 ) {
-    clear_error();
+    return binary_float32_op("solas_tensor_add_float32", lhs, rhs, out, add_float32);
+}
 
-    if (lhs == nullptr) {
-        return set_error("solas_tensor_add_float32 received null lhs tensor");
-    }
+SolasStatus solas_tensor_mul_float32(
+    const SolasTensor *lhs,
+    const SolasTensor *rhs,
+    SolasTensor *out
+) {
+    return binary_float32_op("solas_tensor_mul_float32", lhs, rhs, out, mul_float32);
+}
 
-    if (rhs == nullptr) {
-        return set_error("solas_tensor_add_float32 received null rhs tensor");
-    }
+SolasStatus solas_tensor_sub_float32(
+    const SolasTensor *lhs,
+    const SolasTensor *rhs,
+    SolasTensor *out
+) {
+    return binary_float32_op("solas_tensor_sub_float32", lhs, rhs, out, sub_float32);
+}
 
-    if (out == nullptr) {
-        return set_error("solas_tensor_add_float32 received null output tensor");
-    }
+SolasStatus solas_tensor_div_float32(
+    const SolasTensor *lhs,
+    const SolasTensor *rhs,
+    SolasTensor *out
+) {
+    return binary_float32_op("solas_tensor_div_float32", lhs, rhs, out, div_float32);
+}
 
-    if (lhs->dtype != SOLAS_DTYPE_FLOAT32 ||
-        rhs->dtype != SOLAS_DTYPE_FLOAT32 ||
-        out->dtype != SOLAS_DTYPE_FLOAT32) {
-        return set_error("solas_tensor_add_float32 only supports float32 tensors");
-    }
+SolasStatus solas_tensor_neg_float32(
+    const SolasTensor *input,
+    SolasTensor *out
+) {
+    return unary_float32_op("solas_tensor_neg_float32", input, out, neg_float32);
+}
 
-    if (lhs->shape != rhs->shape || lhs->shape != out->shape) {
-        return set_error("solas_tensor_add_float32 requires matching shapes");
-    }
-
-    if (lhs->data.size() != rhs->data.size() ||
-        lhs->data.size() != out->data.size()) {
-        return set_error("solas_tensor_add_float32 requires matching data sizes");
-    }
-
-    for (size_t i = 0; i < out->data.size(); ++i) {
-        out->data[i] = lhs->data[i] + rhs->data[i];
-    }
-
-    return SOLAS_STATUS_OK;
+SolasStatus solas_tensor_add_scalar_float32(
+    const SolasTensor *input,
+    float scalar,
+    SolasTensor *out
+) {
+    return scalar_float32_op(
+        "solas_tensor_add_scalar_float32",
+        input,
+        scalar,
+        out,
+        add_float32
+    );
 }
